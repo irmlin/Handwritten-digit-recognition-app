@@ -25,7 +25,7 @@ const onPredictButtonClick = async (event) => {
       return
     }
     const response = await sendPicture(picture)
-    
+    console.log(response)
   //   if (response) {
   //     if (response.status === 200) {
   //         setSnackText("Updated successfully!");
