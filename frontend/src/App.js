@@ -2,28 +2,49 @@ import CanvasDraw from "react-canvas-draw";
 import {useState, useRef} from "react";
 import {Button} from "@mui/material";
 import "./styles.css"
+import {sendPicture} from "./Services/ImageService"
 
 export default function App() {
 
 const canvasRef = useRef(null)
-const [drawing, setDrawing] = useState(null)
+const [picture, setPicture] = useState(null)
 
 function updateDrawing() {
   const base64 = canvasRef.current.canvasContainer.childNodes[1].toDataURL();
-  setDrawing(base64)
+  setPicture(base64)
 }
 
 const onCanvasChange = (event) => {
     updateDrawing()
   };
 
-const onPredictButtonClick = (event) => {
-  console.log("predicting")
+const onPredictButtonClick = async (event) => {
+    event.preventDefault()
+    if (!picture) {
+      console.log("Please write a digit first.")
+      return
+    }
+    const response = await sendPicture(picture)
+    
+  //   if (response) {
+  //     if (response.status === 200) {
+  //         setSnackText("Updated successfully!");
+  //         setSnackColor("success");
+  //         setSnackOpen(true);
+  //         setEditingMode(false);
+  //     } else {
+  //         setSnackColor("error");
+  //         setSnackText("Update failed")
+  //     }
+  // } else {
+  //     setSnackColor("error");
+  //     setSnackText("A server error has occurred.");
+  // }
 }
 
 const onClearButtonClick = (event) => {
   canvasRef.current.clear()
-  setDrawing(null)
+  setPicture(null)
 }
 
 const onUndoButtonClick = (event) => {
@@ -35,10 +56,7 @@ const onUndoButtonClick = (event) => {
     <div className={"content"}>
       <CanvasDraw
               ref={canvasRef}
-              style={{
-                boxShadow:
-                  "0 13px 27px -5px rgba(50, 50, 93, 0.25),    0 8px 16px -8px rgba(0, 0, 0, 0.3)"
-              }}
+              className={"canvas"}
               hideGrid={true}
               brushRadius={10}
               brushColor={"black"}
