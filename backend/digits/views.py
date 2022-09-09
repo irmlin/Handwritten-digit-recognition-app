@@ -3,6 +3,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from utils.base64_converter import convert
 
 from .models import Digit
 from .serializers import *
@@ -10,7 +11,8 @@ from .serializers import *
 
 class ApiView(APIView):
     def post(self, request):
-        return Response(request.data, status=status.HTTP_200_OK)
+        image = convert(request.data["content"])
+        return Response(image, status=status.HTTP_200_OK)
 
 
     # def test(request):
