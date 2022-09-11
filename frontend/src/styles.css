@@ -1,5 +1,6 @@
 .content {
     position: absolute;
+    display: flex;
     left: 50%;
     top: 50%;
     -webkit-transform: translate(-50%, -50%);
@@ -11,10 +12,22 @@
     margin-bottom: 15px;
   }
 
-.corners {
-  border-radius: 25px;
-  border: 3px solid #73AD21;
-  width: 50px;
-  height: 50px;
-  text-align: center;
+.table-container {
+  height: 400px;
+  margin-left: 20px;
+}
+
+.table-container > table {
+  height: 400px;
+  width: 160px;
+  text-align: right;
+  border:none;
+}
+
+.cell-padding {
+  padding: 0px 20px !important;
+}
+
+.cell-padding-active {
+  background-color: rgb(39, 146, 74);
 }

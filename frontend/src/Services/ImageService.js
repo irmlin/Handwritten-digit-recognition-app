@@ -2,7 +2,6 @@ import AxiosInstance from "../httpClient"
 
 export const sendPicture = async (picture) => {
     try {
-        console.log(picture)
         return await AxiosInstance.post("api/digit", {
             content: JSON.stringify(picture)
         });
