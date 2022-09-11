@@ -3,6 +3,7 @@ import "./styles.css"
 import {sendPicture} from "./Services/ImageService"
 import PredictionTable from "./Components/PredictionTable"
 import DrawingBoard from "./Components/DrawingBoard"
+import FeedbackSection from "./Components/FeedbackSection";
 
 export default function App() {
 
@@ -32,8 +33,11 @@ const onPredictButtonClick = async (event) => {
 
   return (
     <div className={"content"}>
-      <DrawingBoard onPredictButtonClick={onPredictButtonClick} setPicture={setPicture}/>
-      <PredictionTable prediction={prediction} loading={loading}/>
+      <div style={{display: "flex"}}>
+        <DrawingBoard onPredictButtonClick={onPredictButtonClick} setPicture={setPicture}/>
+        <PredictionTable prediction={prediction} loading={loading}/>
+      </div>
+      <FeedbackSection/>
     </div>
   )
 }

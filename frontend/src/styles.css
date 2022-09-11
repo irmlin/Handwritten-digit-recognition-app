@@ -1,6 +1,5 @@
 .content {
     position: absolute;
-    display: flex;
     left: 50%;
     top: 50%;
     -webkit-transform: translate(-50%, -50%);
