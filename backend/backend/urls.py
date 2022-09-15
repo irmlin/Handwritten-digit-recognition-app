@@ -21,5 +21,5 @@ from digits.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path('api/digit', ApiView.as_view()),
+    re_path('api/digits', ApiView.as_view()),
 ]

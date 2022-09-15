@@ -16,6 +16,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL = os.path.join(BASE_DIR, 'neural_network/models/model.json')
+VERIFIED_PICTURES = os.path.join(BASE_DIR, "neural_network/data/verified_pictures.json")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
