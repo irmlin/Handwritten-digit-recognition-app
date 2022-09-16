@@ -9,29 +9,40 @@ from django.conf import settings
 import numpy as np
 import json
 import os
-
 import pdb
+import threading
+import pickle
+import sys
+# caution: path[0] is reserved for script path (or '' in REPL)
+sys.path.insert(1, '/path/to/application/app/folder')
+
+import data_loader
+
+image_limit = 3
+
+
+class HandleRetraining(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+
 
 
 class ApiView(APIView):
+
     def post(self, request):
         try:
             if "label" in request.data:
-                image = convert(request.data["picture"]).tolist()
-                # label_vector = np.zeros((10, 1))
-                # label_vector[int(request.data["label"])] = 1.0
+                image = convert(request.data["picture"])
                 label = request.data["label"]
-                if os.path.isfile(settings.VERIFIED_PICTURES):
-                    with open(settings.VERIFIED_PICTURES, "r+") as f:
-                        file_data = json.load(f)
-                        file_data["data"][0].append(image)
-                        file_data["data"][1].append(label)
-                        f.seek(0)
-                        json.dump(file_data, f)
-                else:
-                    with open(settings.VERIFIED_PICTURES, 'w') as f:
-                        dictionary = {"data": ([image], [label])}
-                        json.dump(dictionary, f)
+
+                with open(settings.VERIFIED_PICTURES, "ab") as f:
+                    pickle.dump((image, label), f)
+
+                if self.retraining_necessary():
+                    HandleRetraining().start()
 
                 return Response(status=status.HTTP_200_OK)
             else:
@@ -54,3 +65,14 @@ class ApiView(APIView):
     #         return Response(status=status.HTTP_201_CREATED)
     #
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retraining_necessary(self):
+        count = 0
+        with open(settings.VERIFIED_PICTURES, "rb") as f:
+            while True:
+                try:
+                    obj = pickle.load(f)
+                    count += 1
+                except EOFError:
+                    break
+        return count >= image_limit
