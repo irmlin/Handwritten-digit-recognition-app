@@ -1,7 +1,6 @@
 import AxiosInstance from "../httpClient"
 
 export const sendPicture = async (picture) => {
-    console.log(picture)
     try {
         return await AxiosInstance.post("api/digits", {
             picture: JSON.stringify(picture)
@@ -14,7 +13,6 @@ export const sendPicture = async (picture) => {
 };
 
 export const sendLabeledPicture = async (picture, label) => {
-    console.log(picture, label)
     try {
         return await AxiosInstance.post("api/digits", {
             picture: JSON.stringify(picture),

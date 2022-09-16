@@ -4,6 +4,7 @@
     top: 50%;
     -webkit-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+    padding-top: 100px;
   }
 
 .canvas {
