@@ -72,6 +72,7 @@ const onVerifyButtonClick = async (event) => {
   const response = await sendLabeledPicture(picture, label)
   if (response) {
     if (response.status === 200) {
+      console.log(response.data)
       setAlertState({...alertState, alertOpen: true,
         alertText: "Image has been verified and added to the training dataset!", 
         alertColor: "success"})

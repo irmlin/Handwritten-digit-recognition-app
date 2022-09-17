@@ -227,8 +227,7 @@ class Network(object):
                 #     print(f"Eta={eta} has reached 1/128 its initial value. Stopping training now.")
                 #     break
 
-        return self.weights, self.biases, evaluation_cost, evaluation_accuracy, \
-            training_cost, training_accuracy
+        return evaluation_accuracy
 
     def update_mini_batch(self, mini_batch, eta, lmbda, n):
         """Update the network's weights and biases by applying gradient

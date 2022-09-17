@@ -16,6 +16,9 @@ import gzip
 # Third-party libraries
 import numpy as np
 
+import sys, os
+from django.conf import settings
+
 def load_data():
     """Return the MNIST data as a tuple containing the training data,
     the validation data, and the test data.
@@ -39,18 +42,9 @@ def load_data():
     That's done in the wrapper function ``load_data_wrapper()``, see
     below.
     """
-    f = gzip.open('../data/mnist.pkl.gz', 'rb')
+    f = gzip.open(settings.MNIST_DATASET, 'rb')
     training_data, validation_data, test_data = pickle.load(f, encoding='bytes')
     f.close()
-
-    with open("verified_pictures.pickle", "rb") as f:
-        while True:
-            try:
-                obj = pickle.load(f)
-                training_data[0].append(obj[0])
-                training_data[1].append(obj[1])
-            except EOFError:
-                break
 
     return training_data, validation_data, test_data
 
@@ -78,12 +72,28 @@ def load_data_wrapper():
     tr_d, va_d, te_d = load_data()
     training_inputs = [np.reshape(x, (784, 1)) for x in tr_d[0]]
     training_results = [vectorized_result(y) for y in tr_d[1]]
+
+    new_pictures = []
+    new_labels = []
+
+    with open(settings.VERIFIED_PICTURES, "rb") as f:
+        while True:
+            try:
+                obj = pickle.load(f)
+                new_pictures.append(obj[0])
+                new_labels.append(obj[1])
+            except EOFError:
+                break
+
+    training_inputs = np.append(training_inputs, new_pictures, axis=0)
+    training_results = np.append(training_results, new_labels, axis=0)
+
     training_data = zip(training_inputs, training_results)
     validation_inputs = [np.reshape(x, (784, 1)) for x in va_d[0]]
     validation_data = zip(validation_inputs, va_d[1])
     test_inputs = [np.reshape(x, (784, 1)) for x in te_d[0]]
     test_data = zip(test_inputs, te_d[1])
-    return training_data, validation_data, test_data
+    return list(training_data), list(validation_data), list(test_data)
 
 def vectorized_result(j):
     """Return a 10-dimensional unit vector with a 1.0 in the jth

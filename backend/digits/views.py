@@ -15,7 +15,9 @@ import pickle
 import sys
 
 sys.path.insert(1, os.path.join(settings.BASE_DIR, 'neural_network/data'))
+sys.path.insert(2, os.path.join(settings.BASE_DIR, 'neural_network'))
 import data_loader
+import network
 
 image_limit = 3
 
@@ -27,7 +29,22 @@ class HandleRetraining(threading.Thread):
 
     def run(self):
         training_data, validation_data, test_data = data_loader.load_data_wrapper()
-        print(len(training_data[0]), len(training_data[1]))
+        net = network.Network([784, 30, 10], cost=network.CrossEntropyCost)
+        print(len(training_data[0]))
+        model_accuracy = net.SGD(
+            training_data=training_data,
+            epochs=15,
+            mini_batch_size=10,
+            eta=0.1,
+            lmbda=5,
+            evaluation_data=validation_data,
+            monitor_evaluation_cost=False,
+            monitor_evaluation_accuracy=True,
+            monitor_training_cost=False,
+            monitor_training_accuracy=True,
+        )
+
+        net.save(settings.MODEL)
 
 
 class ApiView(APIView):
@@ -37,14 +54,18 @@ class ApiView(APIView):
             if "label" in request.data:
                 image = convert(request.data["picture"])
                 label = request.data["label"]
+                label_vector = np.zeros((10, 1))
+                label_vector[label] = 1.0
 
                 with open(settings.VERIFIED_PICTURES, "ab") as f:
-                    pickle.dump((image, label), f)
+                    pickle.dump((image, label_vector), f)
 
+                message = ""
                 if self.retraining_necessary():
+                    message = "Model is now retraining."
                     HandleRetraining().start()
 
-                return Response(status=status.HTTP_200_OK)
+                return Response(message, status=status.HTTP_200_OK)
             else:
                 image = convert(request.data["picture"])
                 net = network.load(settings.MODEL)
