@@ -13,9 +13,8 @@ import pdb
 import threading
 import pickle
 import sys
-# caution: path[0] is reserved for script path (or '' in REPL)
-sys.path.insert(1, '/path/to/application/app/folder')
 
+sys.path.insert(1, os.path.join(settings.BASE_DIR, 'neural_network/data'))
 import data_loader
 
 image_limit = 3
@@ -27,7 +26,8 @@ class HandleRetraining(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-
+        training_data, validation_data, test_data = data_loader.load_data_wrapper()
+        print(len(training_data[0]), len(training_data[1]))
 
 
 class ApiView(APIView):

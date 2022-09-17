@@ -43,7 +43,6 @@ def load_data():
     training_data, validation_data, test_data = pickle.load(f, encoding='bytes')
     f.close()
 
-    new_data = []
     with open("verified_pictures.pickle", "rb") as f:
         while True:
             try:
@@ -52,7 +51,6 @@ def load_data():
                 training_data[1].append(obj[1])
             except EOFError:
                 break
-
 
     return training_data, validation_data, test_data
 

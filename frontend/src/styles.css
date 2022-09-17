@@ -30,5 +30,6 @@
 
 .cell-padding-active {
   background-color: rgb(39, 146, 74);
-  border: 2px solid rgb(39, 146, 74)
+  border: 2px solid rgb(39, 146, 74);
+  color: white !important;
 }
