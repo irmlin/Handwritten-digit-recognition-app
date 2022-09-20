@@ -7,9 +7,10 @@ import json
 from scipy import ndimage
 
 
-class BytesToPictureConverter():
+class BytesToPictureConverter:
 
-    def convert(self, b_image):
+    @staticmethod
+    def convert(b_image):
         try:
             data = json.loads(b_image)["data"]
             img = Image.open(BytesIO(bytes(data))).convert("RGBA")
@@ -49,25 +50,27 @@ class BytesToPictureConverter():
             rowsPadding = (int(math.ceil((28 - rows) / 2.0)), int(math.floor((28 - rows) / 2.0)))
             gray = np.lib.pad(gray, (rowsPadding, colsPadding), 'constant')
 
-            shiftx, shifty = self.__get_best_shift(gray)
-            shifted = self.__shift(gray, shiftx, shifty)
+            shiftx, shifty = get_best_shift(gray)
+            shifted = shift(gray, shiftx, shifty)
             gray = shifted
 
             return gray.reshape((784, 1)) / 255
         except Exception:
             raise
 
-    def __get_best_shift(self, img):
-        cy, cx = ndimage.center_of_mass(img)
 
-        rows, cols = img.shape
-        shiftx = np.round(cols / 2.0 - cx).astype(int)
-        shifty = np.round(rows / 2.0 - cy).astype(int)
+def get_best_shift(img):
+    cy, cx = ndimage.center_of_mass(img)
 
-        return shiftx, shifty
+    rows, cols = img.shape
+    shiftx = np.round(cols / 2.0 - cx).astype(int)
+    shifty = np.round(rows / 2.0 - cy).astype(int)
 
-    def __shift(self, img, sx, sy):
-        rows, cols = img.shape
-        M = np.float32([[1, 0, sx], [0, 1, sy]])
-        shifted = cv2.warpAffine(img, M, (cols, rows))
-        return shifted
+    return shiftx, shifty
+
+
+def shift(img, sx, sy):
+    rows, cols = img.shape
+    M = np.float32([[1, 0, sx], [0, 1, sy]])
+    shifted = cv2.warpAffine(img, M, (cols, rows))
+    return shifted

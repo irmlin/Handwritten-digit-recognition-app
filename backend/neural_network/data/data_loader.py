@@ -72,22 +72,6 @@ def load_data_wrapper():
     tr_d, va_d, te_d = load_data()
     training_inputs = [np.reshape(x, (784, 1)) for x in tr_d[0]]
     training_results = [vectorized_result(y) for y in tr_d[1]]
-
-    new_pictures = []
-    new_labels = []
-
-    with open(settings.VERIFIED_PICTURES, "rb") as f:
-        while True:
-            try:
-                obj = pickle.load(f)
-                new_pictures.append(obj[0])
-                new_labels.append(obj[1])
-            except EOFError:
-                break
-
-    training_inputs = np.append(training_inputs, new_pictures, axis=0)
-    training_results = np.append(training_results, new_labels, axis=0)
-
     training_data = zip(training_inputs, training_results)
     validation_inputs = [np.reshape(x, (784, 1)) for x in va_d[0]]
     validation_data = zip(validation_inputs, va_d[1])

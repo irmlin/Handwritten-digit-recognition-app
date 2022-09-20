@@ -5,7 +5,7 @@ import numpy as np
 
 class Digit(models.Model):
     picture = NDArrayField(shape=(784, 1), dtype=np.float64)
-    label = models.SmallIntegerField()
+    label = models.SmallIntegerField(null=True)
 
     @classmethod
     def create(cls, picture, label):
@@ -13,4 +13,4 @@ class Digit(models.Model):
         return digit
 
     def __str__(self):
-        return self.label
+        return str(self.label)
