@@ -3,6 +3,7 @@ from .models import Digit
 
 
 class DigitSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Digit
-        fields = 'picture'
+        fields = ('picture', 'label')

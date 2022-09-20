@@ -3,6 +3,9 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+
+from digits.models import Digit
+from digits.serializers import DigitSerializer
 from utils.base64_converter import convert
 from neural_network import network
 from django.conf import settings
@@ -19,7 +22,7 @@ sys.path.insert(2, os.path.join(settings.BASE_DIR, 'neural_network'))
 import data_loader
 import network
 
-image_limit = 3
+image_limit = 30
 
 
 class HandleRetraining(threading.Thread):
@@ -30,7 +33,6 @@ class HandleRetraining(threading.Thread):
     def run(self):
         training_data, validation_data, test_data = data_loader.load_data_wrapper()
         net = network.Network([784, 30, 10], cost=network.CrossEntropyCost)
-        print(len(training_data[0]))
         model_accuracy = net.SGD(
             training_data=training_data,
             epochs=15,
@@ -51,19 +53,24 @@ class ApiView(APIView):
 
     def post(self, request):
         try:
+            import pdb
+            pdb.set_trace()
             if "label" in request.data:
-                image = convert(request.data["picture"])
+                picture = convert(request.data["picture"])
                 label = request.data["label"]
-                label_vector = np.zeros((10, 1))
-                label_vector[label] = 1.0
+                # digit = Digit.create(picture, label)
 
-                with open(settings.VERIFIED_PICTURES, "ab") as f:
-                    pickle.dump((image, label_vector), f)
+                serializer = DigitSerializer(data={picture:picture, label:label})
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(status=status.HTTP_201_CREATED)
+
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
                 message = ""
-                if self.retraining_necessary():
-                    message = "Model is now retraining."
-                    HandleRetraining().start()
+                # if self.retraining_necessary():
+                #     message = "Model is now retraining."
+                #     HandleRetraining().start()
 
                 return Response(message, status=status.HTTP_200_OK)
             else:

@@ -18,7 +18,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL = os.path.join(BASE_DIR, 'neural_network/models/model.json')
 VERIFIED_PICTURES = os.path.join(BASE_DIR, "neural_network/data/verified_pictures.pickle")
 MNIST_DATASET = os.path.join(BASE_DIR, "neural_network/data/mnist.pkl.gz")
-MNIST_DATASET = os.path.join(BASE_DIR, "neural_network/data/mnist.pkl.gz")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
