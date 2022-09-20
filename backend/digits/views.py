@@ -1,26 +1,21 @@
-from django.shortcuts import render
-
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
 from digits.models import Digit
-from utils.utils import BytesToPictureConverter
-from neural_network import network
+from digits.utils.utils import convert_bytes_to_grayscale
+from digits.neural_network import network
 from django.conf import settings
 
 import os
-import pdb
 import threading
 import numpy as np
 import sys
 
-sys.path.insert(1, os.path.join(settings.BASE_DIR, 'neural_network/data'))
-sys.path.insert(2, os.path.join(settings.BASE_DIR, 'neural_network'))
+sys.path.insert(1, os.path.join(settings.BASE_DIR, 'digits/neural_network/data'))
+sys.path.insert(2, os.path.join(settings.BASE_DIR, 'digits/neural_network'))
 import data_loader
 import network
-
-image_limit = 2
 
 
 class HandleRetraining(threading.Thread):
@@ -67,27 +62,30 @@ class ApiView(APIView):
 
     def post(self, request):
         try:
+            picture = convert_bytes_to_grayscale(request.data["picture"])
+
             if "label" in request.data:
-                picture = BytesToPictureConverter.convert(b_image=request.data["picture"])
                 label = request.data["label"]
                 digit = Digit.create(picture, label)
                 digit.save()
 
-                message = ""
-                if self.__retraining_necessary():
-                    message = "Model is now retraining."
+                retrain, count = self.__retraining_necessary()
+                message = f"Picture verified ({count} total new images collected)."
+
+                if retrain:
+                    message += " Model is now retraining."
                     HandleRetraining().start()
 
                 return Response(message, status=status.HTTP_200_OK)
             else:
-                picture = BytesToPictureConverter.convert(request.data["picture"])
                 net = network.load(settings.MODEL)
                 prediction = net.feedforward(picture)
                 return Response(prediction.reshape(prediction.shape[0]), status=status.HTTP_200_OK)
+
         except Exception as e:
             print(e)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(e, status=status.HTTP_400_BAD_REQUEST)
 
     def __retraining_necessary(self):
         count = Digit.objects.all().count()
-        return count >= image_limit
+        return (count % settings.IMAGE_LIMIT) == 0, count

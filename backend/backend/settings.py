@@ -15,9 +15,9 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL = os.path.join(BASE_DIR, 'neural_network/models/model.json')
-VERIFIED_PICTURES = os.path.join(BASE_DIR, "neural_network/data/verified_pictures.pickle")
-MNIST_DATASET = os.path.join(BASE_DIR, "neural_network/data/mnist.pkl.gz")
+MODEL = os.path.join(BASE_DIR, 'digits/neural_network/models/model.json')
+MNIST_DATASET = os.path.join(BASE_DIR, "digits/neural_network/data/mnist.pkl.gz")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -27,6 +27,9 @@ SECRET_KEY = 'django-insecure-4d-$t82#laml&b3ep(s%0)3m3pmz&!(rj$3rynf7x1^s3u4v=n
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# Retrain neural network after the given amount of new images are collected
+IMAGE_LIMIT = 5
 
 ALLOWED_HOSTS = []
 
