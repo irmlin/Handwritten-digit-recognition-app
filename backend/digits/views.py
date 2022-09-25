@@ -29,8 +29,6 @@ class HandleRetraining(threading.Thread):
         validation_and_test_data_raw = Digit.objects.all().filter(is_training_digit=False)
         training_data = self.prepare_data(training_data_raw)
         validation_and_test_data = self.prepare_data(validation_and_test_data_raw, is_test=True)
-        # import pdb
-        # pdb.set_trace()
         print("Retraining...")
 
         net = network.Network([784, 30, 10], cost=network.CrossEntropyCost)
@@ -47,7 +45,13 @@ class HandleRetraining(threading.Thread):
             monitor_training_accuracy=True,
         )
 
-        net.save(settings.MODEL, evaluation_accuracy=evaluation_accuracy, training_accuracy=training_accuracy)
+
+        state = ModelState.objects.all()[0]
+        state.biases = json.dumps([b.tolist() for b in net.biases])
+        state.weights = json.dumps([w.tolist() for w in net.weights])
+        state.train_accuracy = training_accuracy[-1]
+        state.test_accuracy = evaluation_accuracy[-1]
+        state.save()
 
     def prepare_data(self, raw_data, is_test=False):
 
@@ -64,11 +68,13 @@ class HandleRetraining(threading.Thread):
 
         return list(zip(pictures, labels))
 
+
 class ApiView(APIView):
 
     def post(self, request):
         try:
             picture = convert_bytes_to_grayscale(request.data["picture"])
+            original_image_count = 70000
 
             if "label" in request.data:
                 label = request.data["label"]
@@ -76,7 +82,7 @@ class ApiView(APIView):
                 digit.save()
 
                 retrain, count = self.__retraining_necessary()
-                message = f"Picture verified ({count} total new images collected)."
+                message = f"Picture verified ({count - original_image_count} total new images collected)."
 
                 if retrain:
                     message += " Model is now retraining."
@@ -97,5 +103,5 @@ class ApiView(APIView):
             return Response(e, status=status.HTTP_400_BAD_REQUEST)
 
     def __retraining_necessary(self):
-        count = Digit.objects.all().count()
+        count = Digit.objects.count()
         return (count % settings.IMAGE_LIMIT) == 0, count

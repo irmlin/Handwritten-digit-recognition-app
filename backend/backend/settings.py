@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-4d-$t82#laml&b3ep(s%0)3m3pmz&!(rj$3rynf7x1^s3u4v=n
 DEBUG = True
 
 # Retrain neural network after the given amount of new images are collected
-IMAGE_LIMIT = 1
+IMAGE_LIMIT = 5
 
 ALLOWED_HOSTS = []
 
