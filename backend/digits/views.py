@@ -45,12 +45,12 @@ class HandleRetraining(threading.Thread):
             monitor_training_accuracy=True,
         )
 
-
         state = ModelState.objects.all()[0]
         state.biases = json.dumps([b.tolist() for b in net.biases])
         state.weights = json.dumps([w.tolist() for w in net.weights])
         state.train_accuracy = training_accuracy[-1]
         state.test_accuracy = evaluation_accuracy[-1]
+        state.is_training = False
         state.save()
 
     def prepare_data(self, raw_data, is_test=False):
@@ -83,12 +83,23 @@ class ApiView(APIView):
 
                 retrain, count = self.__retraining_necessary()
                 message = f"Picture verified ({count - original_image_count} total new images collected)."
+                state = ModelState.objects.all()[0]
 
-                if retrain:
+                # only retrain model if it is not already performing training
+                if retrain and not state.is_training:
                     message += " Model is now retraining."
+                    state.is_training = True
+                    state.save()
                     HandleRetraining().start()
 
-                return Response(message, status=status.HTTP_200_OK)
+                response_data = {
+                    "message": message,
+                    "train_accuracy": state.train_accuracy,
+                    "test_accuracy": state.test_accuracy,
+                    "is_training": state.is_training
+                }
+
+                return Response(response_data, status=status.HTTP_200_OK)
             else:
                 json_dec = json.decoder.JSONDecoder()
                 state = ModelState.objects.all()[0]
@@ -96,11 +107,30 @@ class ApiView(APIView):
                 weights = json_dec.decode(state.weights)
                 net = network.load(biases, weights)
                 prediction = net.feedforward(picture)
-                return Response(prediction.reshape(prediction.shape[0]), status=status.HTTP_200_OK)
+                response_data = {
+                    "prediction": prediction.reshape(prediction.shape[0]),
+                    "train_accuracy": state.train_accuracy,
+                    "test_accuracy": state.test_accuracy,
+                    "is_training": state.is_training
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
 
         except Exception as e:
             print(e)
-            return Response(e, status=status.HTTP_400_BAD_REQUEST)
+            return Response("Internal server error", status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        try:
+            state = ModelState.objects.all()[0]
+            response_data = {
+                "train_accuracy": state.train_accuracy,
+                "test_accuracy": state.test_accuracy,
+                "is_training": state.is_training
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response("Internal server error", status=status.HTTP_400_BAD_REQUEST)
 
     def __retraining_necessary(self):
         count = Digit.objects.count()

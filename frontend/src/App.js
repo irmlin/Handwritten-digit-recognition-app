@@ -1,15 +1,21 @@
-import {useState} from "react";
+import {useState, useEffect, useCallback} from "react";
 import "./styles.css"
 import {Alert, Snackbar} from "@mui/material";
-import {sendPicture, sendLabeledPicture} from "./Services/ImageService"
+import {sendPicture, sendLabeledPicture, getModelState} from "./Services/ImageService"
 import PredictionTable from "./Components/PredictionTable"
 import DrawingBoard from "./Components/DrawingBoard"
 import FeedbackDialog from "./Components/FeedbackDialog";
+import ModelStateTable from "./Components/ModelStateTable";
 
 export default function App() {
 
 const [picture, setPicture] = useState(null)
 const [prediction, setPrediction] = useState(new Array(10).fill(0))
+const [modelState, setModelState] = useState({
+  trainAccuracy: "",
+  testAccuracy: "",
+  isTraining: ""
+})
 const [label, setLabel] = useState(null)
 const [loading, setLoading] = useState(false)
 const [evaluateButtonEnabled, setEvaluateButtonEnabled] = useState(false)
@@ -25,6 +31,32 @@ const [alertState, setAlertState] = useState({
   alertColor: "success",
   alertText: ""
 })
+
+const fetchModelState = useCallback(async () => {
+  const response = await getModelState();
+  console.log(response)
+  if(response) {
+    if(response.status === 200) {
+      const data = response.data
+      setModelState({...modelState,
+        testAccuracy: data.test_accuracy.toFixed(2) + '%',
+        trainAccuracy: data.train_accuracy.toFixed(2) + '%',
+        isTraining: data.is_training ? "Yes" : "No"})
+    } else {
+      setModelState({...modelState,
+        testAccuracy: "",
+        trainAccuracy: "",
+        isTraining: ""})
+    }
+  } else {
+
+  }
+}, []);
+
+useEffect(() => {
+  fetchModelState();
+}, [fetchModelState, prediction])
+
 
 const onAlertClose = (event, reason) => {
   if (reason === 'clickaway') {
@@ -48,7 +80,7 @@ const onDialogOpen = (event) => {
 }
 
 const onYesClick = async (event) => {
-  setLabel(prediction.indexOf(Math.max(...prediction)))
+  setLabel(prediction.indexOf(Math.max(prediction)))
   setDialogState({...dialogState, verifyButtonEnabled: true, textfieldDisplay: "none", yesChecked: true, noChecked: false})
 }
 
@@ -72,15 +104,22 @@ const onVerifyButtonClick = async (event) => {
   const response = await sendLabeledPicture(picture, label)
   if (response) {
     if (response.status === 200) {
-      console.log(response.data)
+      const data = response.data
       setAlertState({...alertState, alertOpen: true,
-        alertText: "Image has been verified and added to the training dataset!", 
+        alertText: data.message, 
         alertColor: "success"})
       onDialogClose()
       setEvaluateButtonEnabled(false)
+      setModelState({...modelState,
+        testAccuracy: data.test_accuracy.toFixed(2) + '%',
+        trainAccuracy: data.train_accuracy.toFixed(2) + '%',
+        isTraining: data.is_training ? "Yes" : "No"})
     }
     else {
-
+      setModelState({...modelState,
+        testAccuracy: "",
+        trainAccuracy: "",
+        isTraining: ""})
     }
   } else {
 
@@ -99,11 +138,11 @@ const onPredictButtonClick = async (event) => {
     const response = await sendPicture(picture)
     if (response) {
       if (response.status === 200) {
-          setPrediction(response.data)
-          setEvaluateButtonEnabled(true)
-          setLoading(false)
+        setPrediction(response.data.prediction)
+        setEvaluateButtonEnabled(true)
+        setLoading(false)
       } else {
-          setPrediction(new Array(10).fill(0))
+        setPrediction(new Array(10).fill(0))
       }
   } else {
 
@@ -121,6 +160,7 @@ const onPredictButtonClick = async (event) => {
           setEvaluateButtonEnabled={setEvaluateButtonEnabled}
         />
         <PredictionTable prediction={prediction} loading={loading}/>
+        <ModelStateTable modelState={modelState}/>
       </div>
       <FeedbackDialog
         onDialogClose={onDialogClose}
@@ -130,19 +170,19 @@ const onPredictButtonClick = async (event) => {
         onNoClick={onNoClick}
         dialogState={dialogState}
         label={label}
-        />
-        {
-          <Snackbar open={alertState.alertOpen}
-            autoHideDuration={5000}
-            onClose={onAlertClose} 
-            anchorOrigin={{ vertical: "top", horizontal: "center"}}
-            sx={{whiteSpace: "nowrap"}}
-          >
-            <Alert variant={"filled"} onClose={onAlertClose} severity={alertState.alertColor}>
-              {alertState.alertText}
-            </Alert>
-          </Snackbar> 
-        }
+      />
+      {
+        <Snackbar open={alertState.alertOpen}
+          autoHideDuration={5000}
+          onClose={onAlertClose} 
+          anchorOrigin={{ vertical: "top", horizontal: "center"}}
+          sx={{whiteSpace: "nowrap"}}
+        >
+          <Alert variant={"filled"} onClose={onAlertClose} severity={alertState.alertColor}>
+            {alertState.alertText}
+          </Alert>
+        </Snackbar> 
+      }
     </div>
   )
 }

@@ -12,18 +12,6 @@
     margin-bottom: 15px;
   }
 
-.table-container {
-  height: 400px;
-  margin-left: 20px;
-}
-
-.table-container > table {
-  height: 400px;
-  width: 160px;
-  text-align: right;
-  border:none;
-}
-
 .cell-padding {
   padding: 0px 20px !important;
 }

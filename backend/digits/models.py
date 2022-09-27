@@ -23,8 +23,9 @@ class ModelState(models.Model):
     train_accuracy = models.FloatField(default=0.0)
     test_accuracy = models.FloatField(default=0.0)
     retrain_in = models.SmallIntegerField(default=5)
+    is_training = models.BooleanField(default=False)
 
     @classmethod
-    def create(cls, biases, weights, train_accuracy, test_accuracy, retrain_in):
-        state = cls(biases, weights, train_accuracy, test_accuracy, retrain_in)
+    def create(cls, biases, weights, train_accuracy, test_accuracy, retrain_in, is_training):
+        state = cls(biases, weights, train_accuracy, test_accuracy, retrain_in, is_training)
         return state

@@ -14,8 +14,8 @@ export default function PredictionTable({prediction, loading}) {
     }
 
     return (
-        <TableContainer className={"table-container"} component={Paper}>
-            <Table>
+        <TableContainer sx={{overflowX: "visible", height: 400, ml: 5}} component={Paper}>
+            <Table sx={{height: "inherit"}}>
                 <TableBody>
                     {prediction.map((p, index) => (
                     <TableRow  key={index}>

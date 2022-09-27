@@ -23,3 +23,12 @@ export const sendLabeledPicture = async (picture, label) => {
         return err.response;
     }
 };
+
+export const getModelState = async () => {
+    try {
+        return await AxiosInstance.get("api/digits");
+    } catch (err) {
+        console.error("An error occured while processing the request:", err);
+        return err.response;
+    }
+};
