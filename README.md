@@ -11,16 +11,27 @@ The neural network is trained using a stochastic gradient descent algorithm. The
 
 # THE APPLICATION
 This is a REST API application with "React" for the frontend and python's "Django REST" framework for the backend. The client-side has a single page, where the user can draw a digit (mimicking handwritten digits) and use the trained neural network model to guess the digit. The user can see the output of the the network too - the closer the output neurons are to 1, the more assured the network is about its prediction. The outputs are converted to percentages for better user experience (although it is not techinally probability, since the output layer is not a softmax layer). The user is then offered to assess the model's guess - if the prediction was correct, then the drawn digit and its label are immediately sent to the database - the training set increases. If model's guess was wrong, then user can correct the label and then send it to the server. For now, the model retrains when 10 new verified images are collected. The server-side has one endpoint 'api/digits', where request are sent. The image to the server is sent as a byte array, the image is then prccessed in the server and converted to a grayscale array of values from 0 to 1, where 0 is black and 1 is white. Such conversion is applied, because it is suitable for inputs to the neural network. The images and the model's current state are stored in a sqlite3 database, provided by Django framework. The database has two tables:
-  1. Digit. Columns:
-    a. picture - 784-dimensional numpy array
-    b. label - integer representation of the picture (digit itself)
-    c. is_training_input - a boolean value assigning the digit to either training or test/validation set
-  2. ModelState. Columns:
-    a. biases - a string representing network's biases
-    b. weights - a string representing network's weights
-    c. train_accuracy - a float value for model's accuracy on training set
-    d. test_accuracy - a float value for model's accuracy on test set
-    e. is_training - a boolean value for keeping track when the network is training
+1. Digit. Columns:
+  - picture - 784-dimensional numpy array
+  - label - integer representation of the picture (digit itself)
+  - is_training_input - a boolean value assigning the digit to either training or test/validation set
+2. ModelState. Columns:
+  - biases - a string representing network's biases
+  - weights - a string representing network's weights
+  - train_accuracy - a float value for model's accuracy on training set
+  - test_accuracy - a float value for model's accuracy on test set
+  - is_training - a boolean value for keeping track when the network is training
+
+![paveikslas](https://user-images.githubusercontent.com/89913764/192628279-41873706-87fd-478c-a70d-e38f5e0dd8e1.png)
+
+![paveikslas](https://user-images.githubusercontent.com/89913764/192628332-bfc99dc3-a6b5-49f7-84aa-1fdb26cbe00f.png)
+
+![paveikslas](https://user-images.githubusercontent.com/89913764/192628369-31851a4e-3dee-4f03-b131-517c22539602.png)
+
+![paveikslas](https://user-images.githubusercontent.com/89913764/192628785-4f33bb45-9259-4667-98df-1a775be2c5a2.png)
+
+![paveikslas](https://user-images.githubusercontent.com/89913764/192628800-e16a1354-bde2-4016-8588-8c2f484bcd81.png)
+
 
 # REFERENCES:
   1. "Neural Networks and Deep Learning" by Michael Nielsen: http://neuralnetworksanddeeplearning.com/index.html
